@@ -2,36 +2,85 @@ import numpy as np
 import bottleneck
 import random
 class AT_LUCB:
-    def __init__(self, sigma, alpha, epsilon ,bandit, m):
-        self.sigma = sigma
+    #PL: the d symbol is not a sigma but a delta?
+    
+    def __init__(self, sigma1, alpha, epsilon ,bandit, m):
+        self.sigma1 = sigma1
         self.alpha = alpha
         self.bandit = bandit
         self.epsilon = epsilon
         self.m = m
+        #PL: refactor rewards_per_arm
         self.reward_perarm = [[] for i in range(len(bandit.arms))]
+        #PL: refactor mean_per_arm
         self.mean_estimates = np.full(len(bandit.arms), float(0))
-        #self.Jt = np.full(self.m , int(0))
+
+        #PL: why intialize Jt to a random number?
+        #why not to -1, it is never used until it is set in the algo right?
         self.Jt = np.random.randint(len(bandit.arms), size=self.m)
+
+        #PL:
+        #no need to keep this history here,
+        #it is not part of the algo, if you want to keep it,
+        #keep it where you call the algorithm !
+        # -> decouple: only have the algo stuff here!
         self.J = [] # history of top m
         self.J.append(self.Jt)
+
+        #you don't need a list? just S_t?
         self.S = [1] #list of stages, initially 1
+
+    #use this function
+    def sigma(self, s):
+        return sigma1 * alpha**(s-1)
 
     def beta(self, u, t, sigma1):
         k1 = 1.25
-        beta = (np.log((len(self.bandit.arms))*k1*((t)**4)/sigma1)/(2*u))**0.5
-        return beta
+        n = len(self.bandit.arms)
+        return (np.log(n)*k1*((t)**4)/sigma1)/(2*u))**0.5
 
-    def term(self, t, epsilon): #satifies the terminal candition or not
-        L = self.low_arm(t)[1]
-        U = self.high_arm(t)[1]
-        if True == L or True == U:
-            return False
-
+    #PL:
+    #determines whether the terminal condition for this stage is satisfied
+    #  -> correct?
+    def term(self, J_t, t, sigma, epsilon):
+        h = h(t, sigma, J_t)
+        l = l(t, sigma, J_t)
+        U = U(t, l, sigma)
+        T = T(t, h, sigma)
+        return U - T < epsilon
+        
+    def L(self, t, a, sigma):
+        mu = self.mean_estimates[a]
+        if mu == 0.0:
+            return float("-inf")
         else:
-            if (L - U < epsilon):
-                return True
-            else:
-                return False
+            return mu - self.beta(len(self.reward_perarm[a]), t, sigma)
+
+    def U(self, t, a, sigma):
+        mu = self.mean_estimates[a]
+        if mu == 0.0:
+            return float("inf")
+        else:
+            return mu + self.beta(len(self.reward_perarm[a]), t, sigma)
+
+    def h(self, t, sigma, J_t):
+        min_ = sys.float_info.max
+        for j in J_t:
+            L = L(t, j, sigma)
+            if L < min_:
+                min_ = L
+        return min_
+
+    def l(self, t, sigma, J_t):
+        max_ = sys.float_info.min
+        for j in J_t:
+            U = U(t, j, sigma)
+            if U > max_:
+                max_ = U
+        return max_
+                
+                
+        
 
     def high_arm(self, t): #return the mini  mean -beta  of top m and its index
         mini_list = [True if self.mean_estimates[i] == 0 else (self.mean_estimates[i] - self.beta(np.sum(self.reward_perarm[i])/self.mean_estimates[i], t-1, self.sigma)) for i in self.J[t-1]]
