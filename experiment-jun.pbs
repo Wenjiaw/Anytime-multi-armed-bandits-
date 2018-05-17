@@ -1,0 +1,15 @@
+#!/bin/bash -l
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=04:00:00
+#PBS -l mem=16gb
+#PBS -m bea
+#PBS M wenjia.wang0315@gmail.com
+module purge
+module load Python/3.6.1-intel-2017a
+cd $HOME
+cd master2
+m=50
+algo="AT_LUCB"
+bandit="capition"
+mkdir -p output_${bandit}_${algo}_${m}
+python3 experiment-jun.py -a 1000 -v 0.25 -s ${PBS_ARRAYID} -st 150000 -m ${m} -algo ${algo} -b ${bandit} >> output_${bandit}_${algo}_${m}/outfile_${PBS_ARRAYID}.csv
