@@ -1,0 +1,13 @@
+#!/bin/bash -l
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=05:30:00
+#PBS -l mem=16gb
+#PBS -m bea
+#PBS M wenjia.wang0315@gmail.com
+module purge
+ml load matplotlib/2.1.0-foss-2017b-Python-3.6.3
+ml load scikit-learn/0.19.1-foss-2017b-Python-3.6.3
+cd $HOME
+cd master2
+mkdir -p plot_file
+python3 data_plot_influenza.py
