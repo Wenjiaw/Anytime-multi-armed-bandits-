@@ -73,10 +73,13 @@ class AT_LUCB:
 
     def l(self, t, sigma, J_t):
         max_ = sys.float_info.min
-        for j in J_t:
-            U = U(t, j, sigma)
-            if U > max_:
-                max_ = U
+        for j in range(len(bandit.arms))
+            if j in J_t:
+                pass
+            else:
+                U = U(t, j, sigma)
+                if U > max_:
+                    max_ = U
         return max_
                 
                 
