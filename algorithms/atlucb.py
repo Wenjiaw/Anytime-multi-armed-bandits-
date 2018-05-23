@@ -11,9 +11,9 @@ class AT_LUCB:
         self.epsilon = epsilon
         self.m = m
         #PL: refactor rewards_per_arm
-        self.reward_perarm = [[] for i in range(len(bandit.arms))]
+        self.reward_per_arm = [[] for i in range(len(bandit.arms))]
         #PL: refactor mean_per_arm
-        self.mean_estimates = np.full(len(bandit.arms), float(0))
+        self.mean_per_arm = np.full(len(bandit.arms), float(0))
 
         #PL: why intialize Jt to a random number?
         #why not to -1, it is never used until it is set in the algo right?
@@ -42,39 +42,39 @@ class AT_LUCB:
     #PL:
     #determines whether the terminal condition for this stage is satisfied
     #  -> correct?
-    def term(self, J_t, t, sigma, epsilon):
-        h = h(t, sigma, J_t)
-        l = l(t, sigma, J_t)
+    def term(self, t, sigma, epsilon):
+        h = h(t, sigma)
+        l = l(t, sigma)
         U = U(t, l, sigma)
         T = T(t, h, sigma)
         return U - T < epsilon
         
     def L(self, t, a, sigma):
-        mu = self.mean_estimates[a]
+        mu = self.mean_per_arm[a]
         if mu == 0.0:
             return float("-inf")
         else:
-            return mu - self.beta(len(self.reward_perarm[a]), t, sigma)
+            return mu - self.beta(len(self.reward_per_arm[a]), t, sigma)
 
     def U(self, t, a, sigma):
-        mu = self.mean_estimates[a]
+        mu = self.mean_per_arm[a]
         if mu == 0.0:
             return float("inf")
         else:
-            return mu + self.beta(len(self.reward_perarm[a]), t, sigma)
+            return mu + self.beta(len(self.reward_per_arm[a]), t, sigma)
 
-    def h(self, t, sigma, J_t):
+    def h(self, t, sigma):
         min_ = sys.float_info.max
-        for j in J_t:
+        for j in self.J_t:
             L = L(t, j, sigma)
             if L < min_:
                 min_ = L
         return min_
 
-    def l(self, t, sigma, J_t):
+    def l(self, t, sigma):
         max_ = sys.float_info.min
         for j in range(len(bandit.arms))
-            if j in J_t:
+            if j in self.J_t:
                 pass
             else:
                 U = U(t, j, sigma)
@@ -86,7 +86,7 @@ class AT_LUCB:
         
 
     def high_arm(self, t): #return the mini  mean -beta  of top m and its index
-        mini_list = [True if self.mean_estimates[i] == 0 else (self.mean_estimates[i] - self.beta(np.sum(self.reward_perarm[i])/self.mean_estimates[i], t-1, self.sigma)) for i in self.J[t-1]]
+        mini_list = [True if self.mean_estimates[i] == 0 else (self.mean_per_arm[i] - self.beta(np.sum(self.reward_per_arm[i])/self.mean_per_arm[i], t-1, self.sigma)) for i in self.J[t-1]]
         # mini_list store the mean_estimates - Beta of the top m arms.
         # store the ones nerve been pulled as True (beta is infinite)
         if True in mini_list:
@@ -98,7 +98,7 @@ class AT_LUCB:
 
 
     def low_arm(self,t):#return the max  mean + beta  of top m and its index
-        maxm_list = [True if self.mean_estimates[i]==0 else (self.mean_estimates[i] + self.beta(np.sum(self.reward_perarm[i]) / self.mean_estimates[i], t-1, self.sigma)) for i in range(len(self.mean_estimates))]
+        maxm_list = [True if self.mean_per_arm[i]==0 else (self.mean_per_arm[i] + self.beta(np.sum(self.reward_per_arm[i]) / self.mean_per_arm[i], t-1, self.sigma)) for i in range(len(self.mean_per_arm))]
         # maxm_list store the mean_estimates + Beta of the all the arms.
         # store the ones nerve been pulled as True (beta is infinite)
         for i in range(self.m):
@@ -112,18 +112,17 @@ class AT_LUCB:
         return index, maxm
 
     def get_top_m(self):
-        return bottleneck.argpartition(-self.mean_estimates, self.m)[:self.m]
+        return bottleneck.argpartition(-self.mean_per_arm, self.m)[:self.m]
 
     def add_reward(self, arm_i, reward):
-        self.reward_perarm[arm_i].append(reward)
-        self.mean_estimates[arm_i] = np.mean(self.reward_perarm[arm_i])
+        self.reward_per_arm[arm_i].append(reward)
+        self.mean_per_arm[arm_i] = np.mean(self.reward_per_arm[arm_i])
 
     def step(self, t):
-        if self.term(t, self.epsilon):
+        if self.term(t, self.sigma(self.S[t - 1]),self.epsilon):
             s = self.S[t - 1]
-            while self.term(t, self.epsilon):
+            while self.term(t, s, self.epsilon):
                 s = s + 1
-                self.sigma = self.sigma*(self.alpha**(self.s-1))
             self.S.append(s)
             self.Jt = self.get_top_m()
         else:
@@ -139,7 +138,7 @@ class AT_LUCB:
         self.add_reward(low_index, lowreward)
         #pull L
         self.J.append(self.Jt)
-        return self.Jt,self.S[t]
+        return self.Jt
 
 
 
