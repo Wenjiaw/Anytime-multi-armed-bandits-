@@ -8,6 +8,7 @@ from environments.gaussian_jun import linear_means,linear_bandit,polynomial_mean
 from environments.captions_jun import captions_means,captions_bandit
 from environments.influenza import preventive_means,preventive_bandit
 from posteriors.Gaussion_Posterior import GaussianPosterior
+from posteriors.T_distribution_Posterior import T_Posterior
 from ranking import uniform_and_zipf,mth_and_mplus1s,zipf,poisson
 
 def select_means(arm_n,bandit,R_0):
@@ -36,7 +37,7 @@ def select_bandit(arm_n,variance, bandit,R_0):
         bandits = polynomial_bandit(arm_n, variance)
     return bandits
 
-def select_algorithm(arm_n,variance,m,bandits,algorithm,distribution_method):
+def select_algorithm(bandit, arm_n,variance,m,bandits,algorithm,distribution_method):
 
     if algorithm == "AT_LUCB":
         algo = AT_LUCB(0.5, 0.99, 0, bandits, m)
@@ -59,7 +60,11 @@ def select_algorithm(arm_n,variance,m,bandits,algorithm,distribution_method):
             rank = mth_and_mplus1s(m)
         elif distribution_method =="poisson":
             rank = poisson(arm_n, m)
-
-        posterior = GaussianPosterior(variance,1,0.45)
+        if bandit == "influenza":
+            posterior = T_Posterior
+        elif bandit == "capition":
+            pass
+        else:
+            posterior = GaussianPosterior(variance, 1, 0.45)
         algo = TS(bandits, m, rank, posterior)
     return algo
