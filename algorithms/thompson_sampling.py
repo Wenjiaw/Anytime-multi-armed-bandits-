@@ -7,14 +7,13 @@ class TS:
         self.posterior = posterior
         self.rank = rank
         self.reward_per_arm = [[] for i in range(len(self.bandit.arms))]
-        self.mean_per_arm = np.full(len(bandit.arms), float(0))
 
     def add_reward(self, arm_i, reward):
         self.reward_per_arm[arm_i].append(reward)
-        self.mean_per_arm[arm_i] = np.mean(self.reward_per_arm[arm_i])
 
     def get_top_m(self):
-        return np.argsort(-self.mean_per_arm)[0:self.m]
+        mean_per_arm = [posterior.mean(r) for r in self.reward_per_arm] 
+        return np.argsort(-mean_per_arm)[0:self.m]
 
     def step(self, t):
         if t < len(self.bandit.arms) +1:

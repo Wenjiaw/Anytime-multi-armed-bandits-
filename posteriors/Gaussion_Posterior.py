@@ -13,5 +13,6 @@ class GaussianPosterior():
         stddev = np.sqrt(var)
         return np.random.normal(u, stddev)
 
-
+    def mean(self, rewards):
+        return np.mean(rewards)
 

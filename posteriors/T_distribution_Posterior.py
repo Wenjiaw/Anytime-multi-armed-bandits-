@@ -13,3 +13,6 @@ class T_Posterior():
             mu = np.mean(reward)
             T = mu + np.random.standard_t(n+(2*self.alpha)-1)*sigma
         return T
+
+    def mean(self, rewards):
+        return np.mean(rewards)
