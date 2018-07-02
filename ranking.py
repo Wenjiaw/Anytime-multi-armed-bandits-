@@ -49,15 +49,15 @@ def create_zipf(s, n):
 
 def sample_mirrored_zipf(s, N, m):
     zipf = create_zipf(s, N-m)
-    # select randomly 50/50 the left or right side of the distribution
-    if np.random.randint(0, 2) == 0:
-        # try 10000 times to obtain a non-negative sample
-        for i in range(10000):
+    # try 10000 times, as sampling from the left may fail (i.e., be negative) 
+    for i in range(10000):
+        # select randomly 50/50 the left or right side of the distribution
+        if np.random.randint(0, 2) == 0:
             r = zipf.rvs()
             sample = m + 1 - r
             if sample > 0:
                 return sample
-        raise Exception('Unable to sample from mirrorred zipf')
-    else:
-        r = zipf.rvs()
-        return m + r 
+        else:
+            r = zipf.rvs()
+            return m + r 
+     raise Exception('Unable to sample from mirrorred zipf')
