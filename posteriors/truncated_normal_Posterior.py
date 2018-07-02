@@ -15,3 +15,12 @@ class truncated_normal():
             mu0 = np.mean(rewards)
             sigma0 = np.sqrt(known_var/n)
             return stats.truncnorm.rvs(self.a, self.b, loc=mu0, scale=sigma0)
+
+    def mean(self, rewards):
+        n = len(rewards)
+        if n == 0:
+            return (b - a)/2.0
+        else:
+            mu0 = np.mean(rewards)
+            sigma0 = np.sqrt(known_var/n)
+            return stats.truncnorm.mean(self.a, self.b, loc=mu0, scale=sigma0)
