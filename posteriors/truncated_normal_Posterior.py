@@ -8,8 +8,6 @@ class truncated_normal():
 
     def sample_arm_i(self,reward):
         n = len(reward)
-        mu0 = np.mean(reward)
-        sigma0 = np.var(reward)/n
         if n == 0:
             return stats.uniform.rvs(loc=self.a, scale=self.b)
         else:
