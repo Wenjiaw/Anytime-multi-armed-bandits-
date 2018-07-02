@@ -12,5 +12,5 @@ class truncated_normal():
             return stats.uniform.rvs(loc=self.a, scale=self.b)
         else:
             mu0 = np.mean(reward)
-            sigma0 = np.var(reward)/n
+            sigma0 = np.sqrt(np.var(reward)/n)
             return stats.truncnorm.rvs(self.a, self.b, loc=mu0, scale=sigma0)
