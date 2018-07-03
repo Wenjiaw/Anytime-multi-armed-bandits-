@@ -35,11 +35,15 @@ def mth_and_mplus1s(m):
 
 
 def poisson(arm_n, m):
+    def creat_poisson(arm_n, m):
+        result = arm_n
+        while result > arm_n - 1:
+            result = np.random.poisson(m)
+        return result
 
-    result = arm_n
-    while result > arm_n -1:
-        result = np.random.poisson(m - 1)
-    return lambda order: order[np.random.poisson(m-1)]
+    def reward_fn():
+        return lambda :creat_poisson(arm_n,m)
+    return reward_fn()
 
 def create_zipf(s, n):
     x = np.arange(1, n+1)
@@ -47,17 +51,23 @@ def create_zipf(s, n):
     weights /= weights.sum()
     return stats.rv_discrete(name='bounded_zipf', values=(x, weights))
 
-def sample_mirrored_zipf(s, N, m):
+
+def creat_sample_mirrored_zipf(s, N, m):
     zipf = create_zipf(s, N-m)
-    # try 10000 times, as sampling from the left may fail (i.e., be negative) 
+    # try 10000 times, as sampling from the left may fail (i.e., be negative)
     for i in range(10000):
         # select randomly 50/50 the left or right side of the distribution
         if np.random.randint(0, 2) == 0:
             r = zipf.rvs()
-            sample = m + 1 - r
-            if sample > 0:
+            sample = m - r
+            if sample >= 0:
                 return sample
         else:
             r = zipf.rvs()
-            return m + r 
-     raise Exception('Unable to sample from mirrorred zipf')
+            return m - 1 + r
+    raise Exception('Unable to sample from mirrorred zipf')
+
+def sample_mirrored_zipf(s, N, m):
+    def reward_fn():
+        return lambda :creat_sample_mirrored_zipf(s, N, m)
+    return reward_fn()
