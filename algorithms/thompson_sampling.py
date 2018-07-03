@@ -12,7 +12,7 @@ class TS:
         self.reward_per_arm[arm_i].append(reward)
 
     def get_top_m(self):
-        mean_per_arm = [posterior.mean(r) for r in self.reward_per_arm] 
+        mean_per_arm = [self.posterior.mean(r) for r in self.reward_per_arm]
         return np.argsort(-mean_per_arm)[0:self.m]
 
     def step(self, t):
