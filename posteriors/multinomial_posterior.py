@@ -6,11 +6,11 @@ class MultinomialPosterior():
     def sample_arm_i(self, reward):
         p_list = np.random.dirichlet(self.alpha)
         unique, counts = np.unique(reward, return_counts=True)
-        a = 2 * unique
-        index = [int(i) for i in a]
-        if len(unique) == 0:
+        if len(unique) == 0:#keep it because if the unique empty, p_list[index] will return error
             return 0
         else:
+            a = 2 * unique # a can be the index of counts, avoidding the lengh of unique smaller than 3
+            index = [int(i) for i in a]
             return np.dot(counts, p_list[index])
 
 
