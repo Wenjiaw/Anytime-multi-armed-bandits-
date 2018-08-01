@@ -1,26 +1,24 @@
 import numpy as np
 
 class MultinomialPosterior():
-    def __init__(self, alpha):
+    def __init__(self, alpha, c):
         self.alpha = alpha
+        self.c = c
 
     def get_alpha_p(self, c, reward):
-        count = [0, 0, 0]
+        count = np.zeros_like(c)
         for i in reward:
             count[c.index(i)] = count[c.index(i)] + 1
-        f = [count[i] / len(reward) for i in range(len(count))]
-        alpha_p = [(f[i] + self.alpha[i]) for i in range(len(count))]
+        alpha_p = count + self.alpha
         return alpha_p
 
     def sample_arm_i(self, reward):
-        c = [0, 0.5, 1]
-        p_list = np.random.dirichlet(self.get_alpha_p(c, reward))
-        return np.dot(p_list, c)
+        p_list = np.random.dirichlet(self.get_alpha_p(self.c, reward))
+        return np.dot(p_list, self.c)
 
-    def mean(self, rewards):
-        c = [0, 0.5, 1]
+    def mean(self,rewards):
         if len(rewards) == 0:
-            return np.random.choice(c)
+            return np.random.choice(self.c)
         else:
-            alpha_p = self.get_alpha_p(c, rewards)
-            return np.dot(c, alpha_p) / sum(alpha_p)
+            alpha_p = self.get_alpha_p(self.c, rewards)
+            return np.dot(self.c, alpha_p) / sum(alpha_p)
