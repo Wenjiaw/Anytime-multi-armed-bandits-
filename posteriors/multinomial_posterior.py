@@ -18,7 +18,7 @@ class MultinomialPosterior():
 
     def mean(self,rewards):
         if len(rewards) == 0:
-            return np.random.choice(self.c)
+            return 0
         else:
             alpha_p = self.get_alpha_p(self.c, rewards)
             return np.dot(self.c, alpha_p) / sum(alpha_p)
