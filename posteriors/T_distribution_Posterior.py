@@ -4,7 +4,7 @@ class T_Posterior():
         self.alpha = alpha
 
     def freedom(n):
-        n+(2*self.alpha)-1
+        return n+(2*self.alpha)-1
 
     def sample_arm_i(self,reward):
         n = len(reward)
