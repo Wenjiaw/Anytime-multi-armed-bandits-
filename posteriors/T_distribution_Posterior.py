@@ -15,4 +15,7 @@ class T_Posterior():
         return mu + sample*sigma
 
     def mean(self, rewards):
-        return np.mean(rewards)
+        if len(rewards) == 0:
+            return 0
+        else:
+            return np.mean(rewards)
