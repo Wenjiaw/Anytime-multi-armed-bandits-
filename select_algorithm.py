@@ -9,7 +9,9 @@ from environments.captions_jun import captions_means,captions_bandit
 from environments.influenza import preventive_means,preventive_bandit
 from posteriors.Gaussion_Posterior import GaussianPosterior
 from posteriors.T_distribution_Posterior import T_Posterior
-from ranking import uniform_and_zipf,mth_and_mplus1s,zipf,poisson
+from posteriors.multinomial_posterior import MultinomialPosterior
+from posteriors.truncated_normal_Posterior import truncated_normal
+from ranking import uniform_and_zipf,mth_and_mplus1s,zipf,poisson,sample_mirrored_zipf
 
 def select_means(arm_n,bandit,R_0):
     if bandit == "linear":
@@ -61,10 +63,15 @@ def select_algorithm(bandit, arm_n,variance,m,bandits,algorithm,distribution_met
         elif distribution_method =="poisson":
             rank = poisson(arm_n, m)
         if bandit == "influenza":
-            posterior = T_Posterior
+            posterior = T_Posterior(0.5)
         elif bandit == "capition":
-            pass
+            posterior = MultinomialPosterior([0,0,0],[0,0.5,1]
         else:
-            posterior = GaussianPosterior(variance, 1, 0.45)
-        algo = TS(bandits, m, rank, posterior)
+            if posterior == "GP":
+                posterior = GaussianPosterior(variance, 1, 0.45)
+            elif posterior == "truncated":
+                posterior = truncated_normal(0, 0.9, variance)
+            else:
+                posterior = T_Posterior(0.5)
+        algo = TS(bandits, m, rank, posterior,initial_times)
     return algo
