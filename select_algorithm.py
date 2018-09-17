@@ -53,25 +53,4 @@ def select_algorithm(bandit, arm_n,variance,m,bandits,algorithm,distribution_met
         algo = DSH(bandits, m)
     elif algorithm == "Uniform":
         algo = Uniform(bandits, m)
-    elif algorithm == "Thompson":
-        if distribution_method == "uniform_and_zipf":
-            rank = uniform_and_zipf(6,m,arm_n)
-        elif distribution_method == "zipf":
-            rank = zipf(3,arm_n)
-        elif distribution_method =="mth_and_mplus1s":
-            rank = mth_and_mplus1s(m)
-        elif distribution_method =="poisson":
-            rank = poisson(arm_n, m)
-        if bandit == "influenza":
-            posterior = T_Posterior(0.5)
-        elif bandit == "capition":
-            posterior = MultinomialPosterior([0,0,0],[0,0.5,1]
-        else:
-            if posterior == "GP":
-                posterior = GaussianPosterior(variance, 1, 0.45)
-            elif posterior == "truncated":
-                posterior = truncated_normal(0, 0.9, variance)
-            else:
-                posterior = T_Posterior(0.5)
-        algo = TS(bandits, m, rank, posterior,initial_times)
     return algo
